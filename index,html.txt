@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>PersonalWin21 Display</title>
+    <style>
+        /* Dasar tampilan: Hitam & Rapi */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #111; }
+        
+        .container { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+        
+        iframe { 
+            /* TRIK SEMBUNYIKAN KOLOM A: */
+            /* Kita lebarkan iframe 10% dan geser ke kiri untuk memotong kolom A */
+            width: calc(100% + 100px); 
+            margin-left: -60px; 
+            
+            height: 3000px; 
+            border: none;
+            position: absolute;
+            top: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        #page-title {
+            position: fixed;
+            top: 0; width: 100%;
+            background: linear-gradient(to bottom, #000, rgba(0,0,0,0.8));
+            color: #ffd700;
+            text-align: center;
+            z-index: 100;
+            padding: 15px 0;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 1.2rem;
+            border-bottom: 3px solid #ffd700;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div id="page-title">MENGHUBUNGKAN...</div>
+
+<div class="container">
+    <iframe id="sheet-frame" src=""></iframe>
+</div>
+
+<script>
+    // URL dari Publish Entire Document Anda
+    const baseURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRC1JkB8aVBnGb8F3mphAGkbyBhn7tjDOlFxnqvJ9aXRkp6leS0Ogra9MCukRLf9QXbziwzJF7TWKtS/pubhtml";
+
+    // Daftar GID (ID Tab) - Sesuaikan jika ada perubahan di Google Sheets
+    const sheets = [
+        { name: "PVIEW 1", gid: "0" }, 
+        { name: "PVIEW 2", gid: "2026504873" }
+    ];
+
+    let currentSheet = 0;
+    // Nilai -45px untuk membuang baris abu-abu Google (A,B,C)
+    // agar Baris Header Anda tampil paling atas.
+    let scrollPos = -45; 
+    const speed = 1.2;      // Sedikit dipercepat agar tidak membosankan
+    const maxScroll = 2100; // Jarak scroll ke bawah (sampai baris 65-70)
+    
+    const frame = document.getElementById('sheet-frame');
+    const title = document.getElementById('page-title');
+    let scrollTimer;
+
+    function loadSheet(index) {
+        clearInterval(scrollTimer);
+        frame.style.opacity = "0"; // Meredupkan saat ganti
+        
+        scrollPos = -45; 
+        frame.style.top = scrollPos + "px";
+        
+        // Anti-cache: Memaksa data terbaru tanpa delay
+        const antiCache = "&t=" + new Date().getTime();
+        frame.src = baseURL + "?gid=" + sheets[index].gid + "&single=true&widget=false&headers=false" + antiCache;
+        
+        title.innerText = "MENAMPILKAN: " + sheets[index].name;
+
+        frame.onload = () => {
+            frame.style.opacity = "1"; // Muncul kembali
+            // Langsung gerak tanpa jeda sesuai permintaan
+            scrollTimer = setInterval(autoScroll, 30);
+        };
+    }
+
+    function autoScroll() {
+        scrollPos -= speed;
+        frame.style.top = scrollPos + "px";
+
+        // Jika sudah mencapai batas bawah data
+        if (Math.abs(scrollPos) >= maxScroll) {
+            currentSheet = (currentSheet + 1) % sheets.length;
+            loadSheet(currentSheet);
+        }
+    }
+
+    // Jalankan pertama kali
+    loadSheet(currentSheet);
+</script>
+
+</body>
+</html>
