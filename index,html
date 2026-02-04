@@ -2,93 +2,96 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Display Dashboard - Fixed Header</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Monitoring</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; background: #222; overflow: hidden; font-family: 'Arial Narrow', sans-serif; }
+        body { margin: 0; padding: 0; background: #111; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
         
-        /* HEADER UTAMA (NAMA SHEET) */
+        /* Baris 1: Nama Page */
         #top-bar {
             position: fixed; top: 0; width: 100%; height: 40px;
-            background: #000; color: yellow; line-height: 40px;
-            text-align: center; font-weight: bold; font-size: 1.2rem; z-index: 110;
+            background: #000; color: #00FF00; line-height: 40px;
+            text-align: center; font-weight: bold; font-size: 1.2rem; z-index: 1000;
         }
 
-        /* HEADER KOLOM (Daftar Tulisan yang Anda Berikan) */
+        /* Baris 2: Menu Header Kolom (Oswald Font) */
         #column-header {
             position: fixed; top: 40px; width: 100%; height: 40px;
-            background: #444; color: white; z-index: 100;
-            display: flex; align-items: center; justify-content: space-around;
+            background: #333; color: white; z-index: 999;
+            display: flex; align-items: center; 
+            font-family: 'Oswald', sans-serif; /* Menggunakan Font Oswald */
+            font-size: 0.7rem; text-transform: uppercase;
+            border-bottom: 2px solid #00FF00;
             padding: 0 5px; box-sizing: border-box;
-            font-size: 0.75rem; /* Ukuran font agak kecil agar muat banyak kolom */
-            border-bottom: 2px solid #000;
             white-space: nowrap;
         }
 
-        /* Styling teks per kolom agar rapi */
-        .col-item { padding: 0 5px; border-right: 1px solid #666; font-weight: bold; }
-        .col-item:last-child { border-right: none; }
+        /* Styling Item di dalam Header agar Proporsional */
+        .col-item {
+            flex: 1; /* Membuat kolom membagi ruang secara otomatis */
+            text-align: center;
+            border-right: 1px solid #555;
+            padding: 2px;
+        }
 
-        /* AREA KONTEN GOOGLE SHEETS */
-        #frame-container {
+        /* Container Content */
+        #content-area {
             position: absolute; top: 80px; width: 100%; bottom: 0;
-            overflow: hidden;
+            background: white; overflow: hidden;
         }
 
         #sheet-frame {
-            position: absolute; top: 0; width: 100%; height: 5000px; 
-            border: none; transition: opacity 0.5s ease; background: white;
+            position: absolute; top: 0; width: 100%; height: 4500px;
+            border: none; opacity: 0; transition: opacity 0.8s ease;
         }
     </style>
 </head>
 <body>
 
-    <div id="top-bar">LOADING DATA...</div>
-
-    <div id="column-header">
-        <div class="col-item">NAME RESULT</div>
-        <div class="col-item">NIK</div>
-        <div class="col-item">CPY/DEPT</div>
-        <div class="col-item">MCU</div>
-        <div class="col-item">BSS</div>
-        <div class="col-item">OS</div>
-        <div class="col-item">TKPK1</div>
-        <div class="col-item">TKPK2</div>
-        <div class="col-item">TKPK3</div>
-        <div class="col-item">TBOSIET</div>
-        <div class="col-item">OPITO</div>
-        <div class="col-item">SBTC</div>
-        <div class="col-item">IFP_ONWJ</div>
-        <div class="col-item">HSSE.PAS.OSES</div>
-        <div class="col-item">MC_EP</div>
-        <div class="col-item">CCNA</div>
-        <div class="col-item">SKCK</div>
-        <div class="col-item">SPV</div>
-        <div class="col-item">WIN</div>
-    </div>
+    <div id="top-bar">LOADING...</div>
+    <div id="column-header"></div>
     
-    <div id="frame-container">
+    <div id="content-area">
         <iframe id="sheet-frame" src=""></iframe>
     </div>
 
 <script>
     const baseURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRC1JkB8aVBnGb8F3mphAGkbyBhn7tjDOlFxnqvJ9aXRkp6leS0Ogra9MCukRLf9QXbziwzJF7TWKtS/pubhtml";
 
+    // Data Sheets & Header Kolom yang Proporsional
     const sheets = [
-        { name: "PVIEW 1P", gid: "0" }, 
-        { name: "PVIEW 2P", gid: "2026504873" }
+        { 
+            name: "PVIEW 1P", 
+            gid: "0",
+            headers: ["FILL", "NAME", "RESULT", "CPY/DEPT", "MCU", "BSS", "OS", "TKPK1", "TKPK2", "TKPK3", "TBOSIET", "OPITO SBTC", "IFP_ONWJ", "HSSE.PAS.OSES", "MC_EP", "CCNA", "SKCK", "SPV", "WIN"]
+        }, 
+        { 
+            name: "PVIEW 2P", 
+            gid: "2026504873",
+            headers: ["NAME", "CPY/DEPT", "LOC", "4-Jan", "5-9 Jan", "10-15 Jan", "16-31 Jan", "1-4 Feb", "5-26 Feb"]
+        }
     ];
 
     let currentSheet = 0;
     let scrollPos = 0; 
-    const speed = 1.2; // Kecepatan jalan
-
-    // --- PENGATURAN BARIS 70 ---
-    // Sesuaikan angka 1900 ini sampai pas berhenti di baris 70 monitor Anda
-    const maxScroll = 1900; 
-    
+    const speed = 1.2;      
+    const maxScroll = 2100; // Estimasi pixel untuk mencapai baris 70
     let scrollTimer;
+
     const frame = document.getElementById('sheet-frame');
     const topBar = document.getElementById('top-bar');
+    const colHeaderDiv = document.getElementById('column-header');
+
+    function createHeaders(index) {
+        colHeaderDiv.innerHTML = ''; // Kosongkan header sebelumnya
+        sheets[index].headers.forEach(text => {
+            const div = document.createElement('div');
+            div.className = 'col-item';
+            div.innerText = text;
+            colHeaderDiv.appendChild(div);
+        });
+    }
 
     function loadSheet(index) {
         clearInterval(scrollTimer);
@@ -96,15 +99,19 @@
         scrollPos = 0; 
         frame.style.top = "0px";
         
-        const finalURL = `${baseURL}?gid=${sheets[index].gid}&single=true&widget=false&headers=false&chrome=false`;
+        // Munculkan Kolom A: Kami tidak menghapus parameter range, 
+        // Google Sheets secara default memunculkan kolom A jika gid dipanggil.
+        const finalURL = `${baseURL}?gid=${sheets[index].gid}&single=true&widget=false&headers=false&chrome=false&t=${new Date().getTime()}`;
+        
         frame.src = finalURL;
-        topBar.innerText = "MONITORING: " + sheets[index].name;
+        topBar.innerText = "MENAMPILKAN: " + sheets[index].name;
+        createHeaders(index);
 
         frame.onload = () => {
             frame.style.opacity = "1";
             setTimeout(() => {
                 scrollTimer = setInterval(autoScroll, 30);
-            }, 3000); // Diam di atas 3 detik agar orang bisa baca baris awal
+            }, 3000); 
         };
     }
 
@@ -112,20 +119,17 @@
         scrollPos -= speed;
         frame.style.top = scrollPos + "px";
 
-        // Cek jika sudah mencapai batas bawah (Baris 70)
+        // Cek jika sudah mencapai batas baris 70 (maxScroll)
         if (Math.abs(scrollPos) >= maxScroll) {
             clearInterval(scrollTimer);
-            
-            // Diam di bawah 2 detik sebelum ganti halaman
             setTimeout(() => {
                 currentSheet = (currentSheet + 1) % sheets.length;
                 loadSheet(currentSheet);
-            }, 2000);
+            }, 3000); // Diam 3 detik sebelum ganti halaman
         }
     }
 
-    // Jalankan pertama kali
-    loadSheet(currentSheet);
+    window.onload = () => loadSheet(currentSheet);
 </script>
 </body>
 </html>
